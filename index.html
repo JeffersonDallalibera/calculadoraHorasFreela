@@ -50,7 +50,13 @@
       flex: 1;
       min-width: 120px;
     }
-    .btn {
+    .intervalo button {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      border-radius: 8px;
+    }
+    button.btn {
       display: inline-block;
       padding: 10px 15px;
       font-size: 1rem;
@@ -63,9 +69,13 @@
       margin-right: 10px;
       transition: background 0.3s ease;
     }
-    .btn:hover { background-color: #43a047; }
-    .btn-secondary { background-color: #e53935; }
-    .btn-secondary:hover { background-color: #d32f2f; }
+    button.btn:hover { background-color: #43a047; }
+    button.btn-secondary {
+      background-color: #e53935;
+    }
+    button.btn-secondary:hover {
+      background-color: #d32f2f;
+    }
     #resultado {
       margin-top: 20px;
       font-size: 1.1rem;
@@ -80,6 +90,29 @@
       font-weight: bold;
       margin-top: 10px;
     }
+
+    /* ===== RESPONSIVO ===== */
+    @media (max-width: 600px) {
+      .intervalo {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .intervalo input,
+      .intervalo button {
+        width: 100%;
+        flex: none;
+        margin: 4px 0;
+      }
+      button.btn,
+      button.btn-secondary {
+        width: 100%;
+        margin-right: 0;
+      }
+      .container {
+        padding: 15px;
+        margin: 10px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -88,7 +121,7 @@
     <h2>📅 Calculadora de Horas por Data</h2>
 
     <label for="valorHora">Valor da hora (R$):</label>
-    <input type="number" id="valorHora" value="13" step="0.01">
+    <input type="number" id="valorHora" value="13" step="0.01" />
 
     <div class="divider"></div>
     <div id="intervalos"></div>

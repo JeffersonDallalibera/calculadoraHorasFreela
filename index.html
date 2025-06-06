@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Calculadora de Horas por Data</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      color: #555;
+      font-weight: 500;
+    }
+    input[type="time"],
+    input[type="number"],
+    input[type="date"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .intervalo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+      align-items: center;
+    }
+    .intervalo input {
+      flex: 1;
+      min-width: 120px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 15px;
+      font-size: 1rem;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      margin-right: 10px;
+      transition: background 0.3s ease;
+    }
+    .btn:hover { background-color: #43a047; }
+    .btn-secondary { background-color: #e53935; }
+    .btn-secondary:hover { background-color: #d32f2f; }
+    #resultado {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      color: #222;
+      font-weight: 500;
+    }
+    .divider {
+      margin: 25px 0 15px;
+      border-top: 1px solid #ddd;
+    }
+    .data-label {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>📅 Calculadora de Horas por Data</h2>
+
+    <label for="valorHora">Valor da hora (R$):</label>
+    <input type="number" id="valorHora" value="13" step="0.01">
+
+    <div class="divider"></div>
+    <div id="intervalos"></div>
+
+    <button class="btn" onclick="adicionarIntervalo()">➕ Adicionar Intervalo</button>
+    <button class="btn" onclick="calcular()">✅ Calcular Totais</button>
+    <button class="btn btn-secondary" onclick="limpar()">🧹 Limpar Dados</button>
+
+    <div id="resultado"></div>
+  </div>
+
+  <template id="templateIntervalo">
+    <div class="intervalo">
+      <input type="date" class="data" />
+      <input type="time" class="inicio" />
+      <input type="time" class="fim" />
+      <button class="btn" onclick="duplicar(this)">📄 Duplicar</button>
+    </div>
+  </template>
+
+  <script>
+    const intervalosDiv = document.getElementById("intervalos");
+
+    function adicionarIntervalo(data = "", inicio = "", fim = "") {
+      const template = document.getElementById("templateIntervalo");
+      const clone = template.content.cloneNode(true);
+
+      const inputs = clone.querySelectorAll("input");
+      inputs[0].value = data;
+      inputs[1].value = inicio;
+      inputs[2].value = fim;
+
+      intervalosDiv.appendChild(clone);
+    }
+
+    function duplicar(botao) {
+      const intervalo = botao.closest(".intervalo");
+      const data = intervalo.querySelector(".data").value;
+      const inicio = intervalo.querySelector(".inicio").value;
+      const fim = intervalo.querySelector(".fim").value;
+
+      adicionarIntervalo(data, inicio, fim);
+    }
+
+    function limpar() {
+      intervalosDiv.innerHTML = "";
+      document.getElementById("resultado").innerHTML = "";
+    }
+
+    function calcular() {
+      const valorHora = parseFloat(document.getElementById("valorHora").value);
+      const datas = intervalosDiv.querySelectorAll(".data");
+      const inicios = intervalosDiv.querySelectorAll(".inicio");
+      const fins = intervalosDiv.querySelectorAll(".fim");
+
+      const totaisPorData = {};
+      let totalMinutosGeral = 0;
+
+      for (let i = 0; i < datas.length; i++) {
+        const data = datas[i].value;
+        const inicio = inicios[i].value;
+        const fim = fins[i].value;
+
+        if (!data || !inicio || !fim) continue;
+
+        const [h1, m1] = inicio.split(":").map(Number);
+        const [h2, m2] = fim.split(":").map(Number);
+        const minutosInicio = h1 * 60 + m1;
+        const minutosFim = h2 * 60 + m2;
+
+        if (minutosFim > minutosInicio) {
+          const duracao = minutosFim - minutosInicio;
+          if (!totaisPorData[data]) totaisPorData[data] = 0;
+          totaisPorData[data] += duracao;
+          totalMinutosGeral += duracao;
+        }
+      }
+
+      let resultadoHTML = "";
+      for (const data in totaisPorData) {
+        const minutos = totaisPorData[data];
+        const horas = minutos / 60;
+        const valor = horas * valorHora;
+
+        resultadoHTML += `<div class="data-label">${formatarDataBR(data)}:</div>`;
+        resultadoHTML += `⏱ ${horas.toFixed(2)} horas | 💰 R$ ${valor.toFixed(2)}<br>`;
+      }
+
+      const totalHoras = totalMinutosGeral / 60;
+      const valorTotal = totalHoras * valorHora;
+
+      resultadoHTML += `<div class="divider"></div>`;
+      resultadoHTML += `<strong>🔢 Total Geral: ${totalHoras.toFixed(2)} horas | 💰 R$ ${valorTotal.toFixed(2)}</strong>`;
+
+      document.getElementById("resultado").innerHTML = resultadoHTML;
+    }
+
+    function formatarDataBR(dataISO) {
+      if (!dataISO) return '';
+      const [ano, mes, dia] = dataISO.split("-");
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    // Adiciona o primeiro intervalo ao carregar
+    adicionarIntervalo();
+  </script>
+
+</body>
+</html>
